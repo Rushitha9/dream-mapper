@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DreamWell - Insights & Calm</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons for UI -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0F172A; /* Slate 900 */
+            color: #F1F5F9; /* Slate 100 */
+        }
+
+        /* Hide scrollbar */
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Main app container */
+        .main-container {
+            padding-bottom: 100px; /* Space for bottom nav */
+        }
+        
+        /* Active nav item style */
+        .nav-item.active {
+            color: #7C3AED; /* Violet 600 */
+            transform: scale(1.1);
+        }
+
+        .nav-item {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        /* Hide pages by default */
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+
+        /* Breathing animation */
+        @keyframes breathe {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1); }
+            100% { transform: scale(0.8); }
+        }
+
+        .breathing-circle.animating {
+            animation: breathe 8s ease-in-out infinite;
+        }
+
+        /* Custom card style */
+        .card {
+            background-color: #1E293B; /* Slate 800 */
+            border: 1px solid #334155; /* Slate 700 */
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            position: relative;
+            overflow: visible;
+        }
+
+        /* Modal styling */
+        .modal-backdrop {
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+        }
+
+        /* Among Us Crewmate Styles */
+        .crewmate {
+            position: absolute;
+            width: 40px;
+            height: 50px;
+            right: -20px;
+            top: -20px;
+            z-index: 2;
+        }
+
+        .crewmate-body {
+            position: absolute;
+            width: 30px;
+            height: 40px;
+            border: 2px solid #000;
+            border-radius: 20px;
+        }
+
+        .crewmate-backpack {
+            position: absolute;
+            width: 12px;
+            height: 20px;
+            border: 2px solid #000;
+            border-radius: 5px;
+            right: 0;
+            top: 10px;
+        }
+
+        .crewmate-visor {
+            position: absolute;
+            width: 18px;
+            height: 8px;
+            background: #99ddff;
+            border: 2px solid #000;
+            border-radius: 10px;
+            left: 10px;
+            top: 8px;
+        }
+
+        /* Crewmate Colors */
+        .crewmate.red .crewmate-body { background: #ff1616; }
+        .crewmate.red .crewmate-backpack { background: #c41111; }
+
+        .crewmate.purple .crewmate-body { background: #7C3AED; }
+        .crewmate.purple .crewmate-backpack { background: #5B21B6; }
+
+        .crewmate.cyan .crewmate-body { background: #22D3EE; }
+        .crewmate.cyan .crewmate-backpack { background: #0891B2; }
+
+        .crewmate.green .crewmate-body { background: #4ADE80; }
+        .crewmate.green .crewmate-backpack { background: #16A34A; }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(10deg); }
+            50% { transform: translateY(-10px) rotate(10deg); }
+        }
+
+        @keyframes sus {
+            0%, 100% { transform: translateX(0px); }
+            50% { transform: translateX(5px); }
+        }
+
+        .crewmate {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .crewmate:hover {
+            animation: sus 0.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="app" class="main-container max-w-lg mx-auto p-4">
+
+        <!-- ===== INSIGHTS PAGE ===== -->
+        <div id="insightsPage" class="page active animate-fade-in space-y-6">
+            <header>
+                <h1 class="text-3xl font-bold text-violet-400">Your Dream Insights</h1>
+                <p class="text-slate-400 mt-1">Discover the patterns in your subconscious.</p>
+            </header>
+
+            <!-- Personalized Insight Card -->
+            <div id="personalizedInsightCard" class="card flex items-center space-x-4 bg-violet-900/50 border-violet-700">
+                <div class="crewmate purple">
+                    <div class="crewmate-body"></div>
+                    <div class="crewmate-backpack"></div>
+                    <div class="crewmate-visor"></div>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-violet-200">Personalized Insight</h3>
+                    <p class="text-slate-300 text-sm">You often dream about water during high-stress weeks. This can symbolize feeling overwhelmed.</p>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="space-y-6">
+                <!-- Common Emotions Chart -->
+                <div class="card">
+                    <div class="crewmate red">
+                        <div class="crewmate-body"></div>
+                        <div class="crewmate-backpack"></div>
+                        <div class="crewmate-visor"></div>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-4 text-center">Common Emotions</h2>
+                    <div class="relative h-64">
+                        <canvas id="emotionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recurring Themes Chart -->
+                <div class="card">
+                    <div class="crewmate cyan">
+                        <div class="crewmate-body"></div>
+                        <div class="crewmate-backpack"></div>
+                        <div class="crewmate-visor"></div>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-4 text-center">Recurring Themes</h2>
+                    <div class="relative h-64">
+                        <canvas id="themeChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Sleep Quality Chart -->
+                <div class="card">
+                    <div class="crewmate green">
+                        <div class="crewmate-body"></div>
+                        <div class="crewmate-backpack"></div>
+                        <div class="crewmate-visor"></div>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-4 text-center">Sleep Quality vs. Dream Recall</h2>
+                     <div class="relative h-64">
+                        <canvas id="sleepChart"></canvas>
+                    </div>
+                </div>
+            </div>
+             <!-- Simulated trigger for aftermath guidance -->
+            <div class="card text-center">
+                <h3 class="font-semibold mb-2">Had a difficult dream?</h3>
+                <p class="text-sm text-slate-400 mb-4">Get immediate guidance to find your calm.</p>
+                <button onclick="showAftermathGuidance()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition-colors">
+                    I had a nightmare
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== CALMING ACTIVITIES PAGE ===== -->
+        <div id="calmPage" class="page animate-fade-in space-y-6">
+            <header>
+                <h1 class="text-3xl font-bold text-teal-400">Find Your Calm</h1>
+                <p class="text-slate-400 mt-1">Tools to relax your mind and body.</p>
+            </header>
+            
+            <!-- Guided Breathing -->
+            <div class="card text-center">
+                <h2 class="text-xl font-semibold mb-4">Guided Breathing</h2>
+                <div class="flex justify-center items-center h-48">
+                    <div id="breathing-circle" class="breathing-circle w-32 h-32 bg-teal-500 rounded-full flex items-center justify-center transition-transform duration-[4000ms] ease-in-out">
+                        <span id="breathing-text" class="text-lg font-medium text-white">Start</span>
+                    </div>
+                </div>
+                <button id="breathing-control-btn" class="mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-6 rounded-full transition-colors">
+                    Begin
+                </button>
+            </div>
+
+            <!-- Meditation & Music -->
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4">Soothing Sounds</h2>
+                <div class="flex items-center space-x-4 p-3 bg-slate-700/50 rounded-lg">
+                    <i class="ph ph-waves text-3xl text-teal-300"></i>
+                    <div>
+                        <p class="font-semibold">5-Min Calming Audio</p>
+                        <p class="text-sm text-slate-400">Gentle waves and ambient tones</p>
+                    </div>
+                    <button class="ml-auto bg-slate-600 p-2 rounded-full hover:bg-slate-500 transition-colors">
+                        <i class="ph ph-play text-2xl"></i>
+                    </button>
+                </div>
+                 <div class="mt-3 flex items-center space-x-4 p-3 bg-slate-700/50 rounded-lg">
+                    <i class="ph ph-leaf text-3xl text-teal-300"></i>
+                    <div>
+                        <p class="font-semibold">Mindful Affirmations</p>
+                        <p class="text-sm text-slate-400">Positive statements for peace</p>
+                    </div>
+                    <button class="ml-auto bg-slate-600 p-2 rounded-full hover:bg-slate-500 transition-colors">
+                        <i class="ph ph-play text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Suggestion Cards -->
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4">Wellness Suggestions</h2>
+                <div class="space-y-3">
+                    <div class="p-3 bg-slate-700/50 rounded-lg">Try journaling to release lingering thoughts before bed.</div>
+                    <div class="p-3 bg-slate-700/50 rounded-lg">Lower screen time an hour before sleep to improve rest.</div>
+                    <div class="p-3 bg-slate-700/50 rounded-lg">Enjoy a warm, caffeine-free drink like chamomile tea.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ===== BOTTOM NAVIGATION ===== -->
+    <nav class="fixed bottom-0 left-0 right-0 h-20 bg-slate-800/80 backdrop-blur-sm border-t border-slate-700 flex justify-around items-center max-w-lg mx-auto rounded-t-2xl">
+        <button onclick="showPage('insightsPage')" class="nav-item active flex flex-col items-center space-y-1">
+            <i class="ph-fill ph-chart-pie-slice text-3xl"></i>
+            <span class="text-xs font-medium">Insights</span>
+        </button>
+        <button onclick="showPage('calmPage')" class="nav-item flex flex-col items-center space-y-1">
+            <i class="ph-fill ph-leaf text-3xl"></i>
+            <span class="text-xs font-medium">Calm</span>
+        </button>
+    </nav>
+
+    <!-- ===== AFTERMATH GUIDANCE MODAL ===== -->
+    <div id="aftermathModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="card max-w-sm w-full text-center space-y-4 relative">
+            <button onclick="hideAftermathGuidance()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="ph ph-x text-2xl"></i>
+            </button>
+            <i class="ph ph-shield-check text-5xl text-teal-400 mx-auto"></i>
+            <h2 class="text-xl font-bold">That was a difficult dream.</h2>
+            <p class="text-slate-300">Let's take a moment to reset. Here are a few small steps to help you feel grounded and safe.</p>
+            <div class="text-left bg-slate-700/50 p-4 rounded-lg space-y-3">
+                <p><strong>Step 1:</strong> Take one deep, slow breath.</p>
+                <p><strong>Step 2:</strong> Listen to this 3-minute calming audio.</p>
+                <p><strong>Step 3:</strong> Journal the dream to release tension.</p>
+            </div>
+            <button onclick="hideAftermathGuidance()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+                I'm feeling better
+            </button>
+        </div>
+    </div>
+
+
+    <script>
+        // --- MOCK DATA ---
+        const dreamData = {
+            emotions: {
+                labels: ['Anxiety', 'Confusion', 'Happiness', 'Fear', 'Peace'],
+                data: [45, 25, 15, 10, 5],
+            },
+            themes: {
+                labels: ['Water', 'Flying', 'Work', 'School', 'Falling'],
+                data: [30, 22, 18, 15, 10],
+            },
+            sleep: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                quality: [3, 4, 2, 4, 5, 3, 4], // 1-5 scale
+                dreamsRecalled: [2, 3, 1, 3, 4, 2, 3],
+            }
+        };
+
+        // --- NAVIGATION LOGIC ---
+        const pages = document.querySelectorAll('.page');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        function showPage(pageId) {
+            pages.forEach(page => {
+                page.classList.toggle('active', page.id === pageId);
+            });
+            navItems.forEach(item => {
+                // A bit complex logic to match button to pageId, but works.
+                const associatedPage = item.getAttribute('onclick').includes(pageId);
+                item.classList.toggle('active', associatedPage);
+            });
+        }
+        
+        // --- INSIGHTS PAGE LOGIC ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Chart.js Global Config
+            Chart.defaults.color = '#94A3B8'; // slate-400
+            Chart.defaults.font.family = "'Inter', sans-serif";
+
+            // Emotion Chart (Doughnut)
+            const emotionCtx = document.getElementById('emotionChart').getContext('2d');
+            new Chart(emotionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: dreamData.emotions.labels,
+                    datasets: [{
+                        label: 'Emotion Frequency',
+                        data: dreamData.emotions.data,
+                        backgroundColor: ['#A78BFA', '#7C3AED', '#6D28D9', '#5B21B6', '#4C1D95'],
+                        borderColor: '#1E293B',
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend:{
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    weight: '500',
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1E293B',
+                            titleColor: '#F1F5F9',
+                            bodyColor: '#F1F5F9',
+                            padding: 10,
+                            borderRadius: 8,
+                        }
+                    }
+                }
+            });
+
+            // Theme Chart (Bar)
+            const themeCtx = document.getElementById('themeChart').getContext('2d');
+            new Chart(themeCtx, {
+                type: 'bar',
+                data: {
+                    labels: dreamData.themes.labels,
+                    datasets: [{
+                        label: 'Theme Frequency',
+                        data: dreamData.themes.data,
+                        backgroundColor: '#4ADE80',
+                        borderColor: '#1E293B',
+                        borderWidth: 2,
+                        hoverBackgroundColor: '#38B000',
+                        hoverBorderColor: '#1E293B',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: '#334155',
+                            },
+                            ticks: {
+                                color: '#F1F5F9',
+                                font: {
+                                    size: 14,
+                                    weight: '500',
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: '#334155',
+                            },
+                            ticks: {
+                                color: '#F1F5F9',
+                                font: {
+                                    size: 14,
+                                    weight: '500',
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend:{
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#1E293B',
+                            titleColor: '#F1F5F9',
+                            bodyColor: '#F1F5F9',
+                            padding: 10,
+                            borderRadius: 8,
+                        }
+                    }
+                }
+            });
+
+            // Sleep Chart (Line)
+            const sleepCtx = document.getElementById('sleepChart').getContext('2d');
+            new Chart(sleepCtx, {
+                type: 'line',
+                data: {
+                    labels: dreamData.sleep.labels,
+                    datasets: [
+                        {
+                            label: 'Sleep Quality',
+                            data: dreamData.sleep.quality,
+                            borderColor: '#7C3AED',
+                            backgroundColor: 'rgba(124, 58, 237, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                        },
+                        {
+                            label: 'Dreams Recalled',
+                            data: dreamData.sleep.dreamsRecalled,
+                            borderColor: '#4ADE80',
+                            backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: '#334155',
+                            },
+                            ticks: {
+                                color: '#F1F5F9',
+                                font: {
+                                    size: 14,
+                                    weight: '500',
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: '#334155',
+                            },
+                            ticks: {
+                                color: '#F1F5F9',
+                                font: {
+                                    size: 14,
+                                    weight: '500',
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend:{
+                            position: 'top',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    weight: '500',
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1E293B',
+                            titleColor: '#F1F5F9',
+                            bodyColor: '#F1F5F9',
+                            padding: 10,
+                            borderRadius: 8,
+                        }
+                    }
+                }
+            });
+        });
+
+        // --- AFTERMATH GUIDANCE LOGIC ---
+        function showAftermathGuidance() {
+            document.getElementById('aftermathModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scroll
+        }
+
+        function hideAftermathGuidance() {
+            document.getElementById('aftermathModal').classList.add('hidden');
+            document.body.style.overflow = ''; // Restore background scroll
+        }
+
+        // --- BREATHING CIRCLE LOGIC ---
+        const breathingCircle = document.getElementById('breathing-circle');
+        const breathingText = document.getElementById('breathing-text');
+        let isBreathingIn = true;
+        let breathCount = 0;
+
+        function updateBreathingCircle() {
+            const scale = isBreathingIn ? 1.1 : 1;
+            breathingCircle.style.transform = `scale(${scale})`;
+            breathingText.innerText = isBreathingIn ? 'Inhale' : 'Exhale';
+        }
+
+        document.getElementById('breathing-control-btn').addEventListener('click', () => {
+            if (breathCount < 3) {
+                updateBreathingCircle();
+                breathCount++;
+            } else {
+                isBreathingIn = !isBreathingIn;
+                breathCount = 0;
+                setTimeout(() => {
+                    updateBreathingCircle();
+                }, 1000);
+            }
+        });
+
+        // Add suspicious behavior to crewmates
+        document.querySelectorAll('.crewmate').forEach(crewmate => {
+            crewmate.addEventListener('click', () => {
+                crewmate.style.transform = 'scale(0)';
+                setTimeout(() => {
+                    crewmate.style.transform = 'scale(1)';
+                }, 500);
+            });
+        });
+
+        // Random crewmate movement
+        setInterval(() => {
+            const crewmates = document.querySelectorAll('.crewmate');
+            const randomCrewmate = crewmates[Math.floor(Math.random() * crewmates.length)];
+            randomCrewmate.style.transform = 'translateX(10px)';
+            setTimeout(() => {
+                randomCrewmate.style.transform = 'translateX(0)';
+            }, 300);
+        }, 3000);
+
+        // Add this JavaScript code after existing charts
+
+        async function loadMLInsights() {
+            try {
+                const response = await fetch('dream_analysis.json');
+                const analysis = await response.json();
+                
+                // Update emotion chart with ML analyzed data
+                emotionChart.data.labels = Object.keys(analysis.emotions);
+                emotionChart.data.datasets[0].data = Object.values(analysis.emotions);
+                emotionChart.update();
+                
+                // Update themes chart
+                const sortedThemes = Object.entries(analysis.themes)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+                
+                themeChart.data.labels = sortedThemes.map(([theme]) => theme);
+                themeChart.data.datasets[0].data = sortedThemes.map(([, count]) => count);
+                themeChart.update();
+                
+                // Update sleep correlation chart
+                const sleepData = analysis.sleep_correlation;
+                sleepChart.data.labels = Object.keys(sleepData);
+                sleepChart.data.datasets[0].data = Object.values(sleepData);
+                sleepChart.update();
+                
+                // Add ML-generated insights
+                updatePersonalizedInsights(analysis);
+            } catch (error) {
+                console.error('Error loading ML insights:', error);
+            }
+        }
+
+        function updatePersonalizedInsights(analysis) {
+            const insightCard = document.getElementById('personalizedInsightCard');
+            const patterns = detectPatterns(analysis);
+            
+            insightCard.innerHTML = `
+                <div class="crewmate purple">
+                    <div class="crewmate-body"></div>
+                    <div class="crewmate-backpack"></div>
+                    <div class="crewmate-visor"></div>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-violet-200">AI Dream Analysis</h3>
+                    <p class="text-slate-300 text-sm">${patterns}</p>
+                </div>
+            `;
+        }
+
+        function detectPatterns(analysis) {
+            // Implement pattern detection logic based on ML results
+            const emotionTrend = getTopEmotion(analysis.emotions);
+            const sleepInsight = analyzeSleepPattern(analysis.sleep_correlation);
+            const themeInsight = analyzeThemes(analysis.themes);
+            
+            return `${emotionTrend}. ${sleepInsight}. ${themeInsight}`;
+        }
+
+        // Load ML insights when page loads
+        document.addEventListener('DOMContentLoaded', loadMLInsights);
+
+        // Add this in the script section
+
+        async function loadMLAnalysis() {
+            try {
+                const response = await fetch('dream_analysis.json');
+                const analysis = await response.json();
+                
+                // Create charts for ML insights
+                createEmotionChart(analysis.emotions);
+                createThemeChart(analysis.themes);
+                createSleepPatternChart(analysis.sleep_correlation);
+                generatePersonalizedInsights(analysis);
+            } catch (error) {
+                console.error('Error loading ML analysis:', error);
+            }
+        }
+
+        function createEmotionChart(emotions) {
+            const ctx = document.getElementById('emotionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(emotions),
+                    datasets: [{
+                        data: Object.values(emotions),
+                        backgroundColor: [
+                            '#4CAF50', // happy
+                            '#FFC107', // anxious
+                            '#9C27B0', // confused
+                            '#F44336'  // nightmare
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#d1e8ff'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Emotional Distribution',
+                            color: '#65d6f7'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createThemeChart(themes) {
+            const sortedThemes = Object.entries(themes)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 5);
+            
+            const ctx = document.getElementById('themeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedThemes.map(([theme]) => theme),
+                    datasets: [{
+                        label: 'Occurrence',
+                        data: sortedThemes.map(([,count]) => count),
+                        backgroundColor: '#2956d3',
+                        borderColor: '#65d6f7',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(101, 214, 247, 0.1)'
+                            },
+                            ticks: {
+                                color: '#d1e8ff'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#d1e8ff'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Common Dream Themes',
+                            color: '#65d6f7'
+                        }
+                    }
+                }
+            });
+        }
+
+        function generatePersonalizedInsights(analysis) {
+            const insightsContainer = document.getElementById('personalizedInsights');
+            const insights = [];
+            
+            // Generate insights based on patterns
+            const dominantEmotion = Object.entries(analysis.emotions)
+                .sort(([,a], [,b]) => b - a)[0][0];
+            
+            const commonThemes = Object.entries(analysis.themes)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 3)
+                .map(([theme]) => theme);
+            
+            insights.push(`
+                <div class="insight-card">
+                    <div class="crewmate ${dominantEmotion === 'happy' ? 'green' : 'red'}">
+                        <div class="crewmate-body"></div>
+                        <div class="crewmate-backpack"></div>
+                        <div class="crewmate-visor"></div>
+                    </div>
+                    <h3>Emotional Patterns</h3>
+                    <p>Your dreams tend to be mostly ${dominantEmotion}. 
+                       ${dominantEmotion === 'nightmare' ? 'Watch out for impostors!' : 'Keep up the positive energy!'}</p>
+                </div>
+            `);
+            
+            insights.push(`
+                <div class="insight-card">
+                    <div class="crewmate blue">
+                        <div class="crewmate-body"></div>
+                        <div class="crewmate-backpack"></div>
+                        <div class="crewmate-visor"></div>
+                    </div>
+                    <h3>Common Themes</h3>
+                    <p>You frequently dream about: ${commonThemes.join(', ')}</p>
+                </div>
+            `);
+            
+            insightsContainer.innerHTML = insights.join('');
+        }
+
+        // Call the function when page loads
+        document.addEventListener('DOMContentLoaded', loadMLAnalysis);
+    </script>
+</body>
+</html>

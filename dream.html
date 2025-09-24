@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dream Mapper</title>
+    <link rel="stylesheet" href="style1.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VCR+OSD+Mono&display=swap" rel="stylesheet"> 
+</head>
+<body>
+    <main class="console-panel">
+        <header>
+            <h1>Dream Mapper</h1>
+            <p class="alert">ALERT: At least one dream fragment must be logged to complete this task, Crewmate. Others are optional.</p>
+        </header>
+        
+        <form action="#" method="POST">
+            <section class="task-section">
+                <label for="dream-text">TASK: DESCRIBE THE VISUALS <span>(Required)</span></label>
+                <textarea 
+                    id="dream-text" 
+                    name="dream-text" 
+                    rows="6" 
+                    placeholder="What did you see, Crewmate? Was there an Impostor in your thoughts...?" 
+                    required></textarea>
+            </section>
+
+            <section class="task-section">
+                <label>TASK: BROADCAST VOCAL MEMORIES <span>(Optional)</span></label>
+                <div class="voice-recorder">
+                    <button type="button" class="mic-button" aria-label="Start recording">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" fill="currentColor" width="50" height="50">
+                            <path d="M192 0C139 0 96 43 96 96V256c0 53 43 96 96 96s96-43 96-96V96c0-53-43-96-96-96zM64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 89.1 66.2 162.7 152 174.4V464H120c-13.3 0-24 10.7-24 24s10.7 24 24 24h144c13.3 0 24-10.7 24-24s-10.7-24-24-24H208V430.4c85.8-11.7 152-85.3 152-174.4V216c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 70.7-57.3 128-128 128S64 326.7 64 256V216z"/>
+                        </svg>
+                    </button>
+                    <p>Click the icon to begin recording your dream.</p>
+                </div>
+            </section>
+
+            <section class="task-section">
+                <label for="dream-canvas">TASK: SKETCH THE SCENE <span>(Optional)</span></label>
+                <div class="drawing-area">
+                    <canvas id="dream-canvas"></canvas>
+                    <div class="toolbar">
+                        <button type="button" class="tool-btn" title="Pen Tool">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" width="20" height="20">
+                                <path d="M490.3 40.4C512.2 62.27 512.2 97.73 490.3 119.6L460.3 149.7L362.3 51.72L392.4 21.66C414.3-.2135 449.7-.2135 471.6 21.66L490.3 40.4zM312.3 101.7L96 317.7V416h98.3l216.3-216.3L312.3 101.7z"/>
+                        </button>
+                        <button type="button" class="tool-btn" title="Eraser Tool">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" width="20" height="20">
+                                <path d="M497.941 273.941c18.745-18.745 18.745-49.137 0-67.882l-160-160c-18.745-18.745-49.137-18.745-67.882 0l-256 256c-18.745 18.745-18.745 49.137 0 67.882l96 96A48.004 48.004 0 0 0 144 480h356c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12H355.883l142.058-142.059zm-302.627-62.627l137.373 137.373L265.373 416H150.628l-80-80 124.686-124.686z"/>
+                            </svg>
+                        </button>
+                        <div class="color-swatch" style="background-color: #c51111;" title="Red"></div>
+                        <div class="color-swatch" style="background-color: #132fd2;" title="Blue"></div>
+                        <div class="color-swatch" style="background-color: #127f2d;" title="Green"></div>
+                        <div class="color-swatch" style="background-color: #f6f657;" title="Yellow"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="submit-section">
+                <button type="submit" class="emergency-button">
+                    NEXT<br>CREWMATE
+                </button>
+            </section>
+        </form>
+    </main>
+    // Add this script at the end of the body tag, before </body>
+
+<script>
+    const canvas = document.getElementById('dream-canvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let currentTool = 'pen';
+    let currentColor = '#c51111';
+
+    // Set canvas size
+    canvas.width = canvas.parentElement.offsetWidth;
+    canvas.height = 300;
+
+    // Drawing settings
+    ctx.strokeStyle = currentColor;
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+
+    // Tool and color selection
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Remove active class from all buttons
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            // Add active class to clicked button
+            e.currentTarget.classList.add('active');
+            
+            currentTool = e.currentTarget.title.toLowerCase().includes('pen') ? 'pen' : 'eraser';
+            if (currentTool === 'pen') {
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = 3;
+            } else {
+                ctx.strokeStyle = '#FFFFFF'; // Changed to white
+                ctx.lineWidth = 20;
+            }
+        });
+    });
+
+    document.querySelectorAll('.color-swatch').forEach(swatch => {
+        swatch.addEventListener('click', (e) => {
+            currentColor = window.getComputedStyle(e.currentTarget).backgroundColor;
+            if (currentTool === 'pen') {
+                ctx.strokeStyle = currentColor;
+            }
+        });
+    });
+
+    // Drawing event listeners
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    // Touch events
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        startDrawing(e.touches[0]);
+    });
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        draw(e.touches[0]);
+    });
+    canvas.addEventListener('touchend', stopDrawing);
+
+    function startDrawing(e) {
+        isDrawing = true;
+        ctx.beginPath();
+        ctx.moveTo(e.offsetX, e.offsetY);
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(e.offsetX, e.offsetY);
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+    }
+
+    // Form submission handler
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+        
+        // Add flash effect
+        document.body.style.backgroundColor = '#1e2124';
+        setTimeout(() => {
+            document.body.style.backgroundColor = '';
+            // Navigate to dream1.html
+            window.location.href = 'dream1.html';
+        }, 300);
+    });
+</script>
+</body>
+
+</html>

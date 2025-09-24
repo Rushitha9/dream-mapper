@@ -1,0 +1,286 @@
+/* Import the "Among Us" style font */
+@import url('https://fonts.googleapis.com/css2?family=VCR+OSD+Mono&display=swap');
+
+/* Basic Page Setup */
+:root {
+    --primary-glow: #4acff9;
+    --dark-blue: #0a192f;
+    --light-blue: #ccd6f6;
+    --dark-grey: #8892b0;
+    --panel-bg: rgba(18, 41, 71, 0.85);
+    --emergency-red: #ff0d0d;
+    --emergency-shadow: #800000;
+}
+
+body {
+    margin: 0;
+    font-family: 'VCR OSD Mono', 'Courier New', Courier, monospace;
+    background-color: #000;
+    color: var(--light-blue);
+    overflow-x: hidden;
+    background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+    height: 100vh;
+}
+
+/* New Pure CSS Twinkling Stars Background */
+@keyframes twinkle {
+    0% { opacity: 0; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0; }
+}
+
+/* This creates a pseudo-element that will hold our stars */
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    border-radius: 50%;
+    z-index: -1;
+    box-shadow: 
+        /* This is a long list of randomly generated stars (x, y, color) */
+        1888px 388px #FFF, 895px 135px #FFF, 1509px 421px #FFF, 1542px 899px #FFF, 
+        819px 75px #FFF, 287px 534px #FFF, 1695px 893px #FFF, 1530px 653px #FFF, 
+        1199px 432px #FFF, 1814px 446px #FFF, 1302px 559px #FFF, 1109px 803px #FFF, 
+        1830px 177px #FFF, 483px 852px #FFF, 107px 744px #FFF, 874px 343px #FFF, 
+        683px 388px #FFF, 151px 921px #FFF, 1403px 431px #FFF, 917px 229px #FFF, 
+        1059px 235px #FFF, 139px 270px #FFF, 638px 910px #FFF, 292px 648px #FFF, 
+        1140px 119px #FFF, 1032px 308px #FFF, 439px 695px #FFF, 183px 22px #FFF, 
+        1694px 213px #FFF, 974px 769px #FFF, 1107px 321px #FFF, 1585px 201px #FFF, 
+        1559px 343px #FFF, 135px 211px #FFF, 1419px 766px #FFF, 1583px 808px #FFF, 
+        970px 486px #FFF, 1538px 253px #FFF, 1319px 827px #FFF, 471px 283px #FFF, 
+        1100px 949px #FFF, 1395px 94px #FFF, 1332px 531px #FFF, 829px 839px #FFF, 
+        231px 186px #FFF, 1391px 544px #FFF, 843px 490px #FFF, 269px 923px #FFF, 
+        1879px 689px #FFF, 1141px 731px #FFF, 1629px 456px #FFF, 856px 208px #FFF;
+    
+    animation: twinkle 5s infinite ease-in-out;
+}
+/* You can add more layers for more depth by creating more pseudo-elements or child divs */
+
+
+/* Main Console Panel - (No changes below this line, except removing old star CSS) */
+.console-panel {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: var(--panel-bg);
+    border: 3px solid var(--primary-glow);
+    border-radius: 15px;
+    box-shadow: 0 0 25px var(--primary-glow);
+    backdrop-filter: blur(5px);
+    position: relative; /* Ensures it stays above the pseudo-element background */
+    z-index: 1;
+}
+
+header {
+    text-align: center;
+    border-bottom: 2px dashed var(--dark-grey);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 2.5em;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px var(--primary-glow);
+}
+
+.alert {
+    color: #ffc107;
+    font-size: 1.1em;
+}
+
+/* Task Sections Styling */
+.task-section {
+    margin-bottom: 35px;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+label span {
+    color: var(--dark-grey);
+    font-size: 0.8em;
+}
+
+/* Text Input Area */
+textarea {
+    width: 100%;
+    padding: 15px;
+    background-color: var(--dark-blue);
+    border: 2px solid var(--primary-glow);
+    border-radius: 8px;
+    color: var(--light-blue);
+    font-family: 'VCR OSD Mono', monospace;
+    font-size: 1em;
+    resize: vertical;
+    box-shadow: inset 0 0 10px rgba(74, 207, 249, 0.5);
+    transition: box-shadow 0.3s ease;
+}
+
+textarea:focus {
+    outline: none;
+    box-shadow: 0 0 15px var(--primary-glow), inset 0 0 10px rgba(74, 207, 249, 0.7);
+}
+
+/* Voice Recorder */
+.voice-recorder {
+    border: 2px dashed var(--primary-glow);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+}
+
+.mic-button {
+    background: none;
+    border: none;
+    color: var(--light-blue);
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.mic-button:hover {
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.mic-button.recording {
+    color: var(--emergency-red);
+    animation: pulse-red 1.5s infinite;
+}
+
+.voice-recorder p {
+    color: var(--dark-grey);
+    margin-top: 10px;
+}
+
+/* Drawing Area */
+.drawing-area {
+    display: flex;
+    gap: 15px;
+}
+
+#dream-canvas {
+    flex-grow: 1;
+    background-color: #e0e8f0;
+    border: 2px solid var(--primary-glow);
+    border-radius: 8px;
+    cursor: crosshair;
+    background-image: linear-gradient(rgba(136, 146, 176, 0.3) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(136, 146, 176, 0.3) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: var(--dark-blue);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid var(--primary-glow);
+}
+
+.tool-btn {
+    background-color: var(--dark-grey);
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    color: var(--dark-blue);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.tool-btn:hover {
+    background-color: var(--light-blue);
+}
+
+.color-swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.color-swatch:hover {
+    transform: scale(1.1);
+    border-color: #fff;
+}
+
+/* Submit Button Section */
+.submit-section {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.emergency-button {
+    width: 150px;
+    height: 150px;
+    background-color: var(--emergency-red);
+    color: #fff;
+    font-family: 'VCR OSD Mono', monospace;
+    font-size: 1.8em;
+    font-weight: bold;
+    line-height: 1.2;
+    text-align: center;
+    border-radius: 50%;
+    border: 8px solid var(--emergency-shadow);
+    cursor: pointer;
+    box-shadow: 0 0 20px var(--emergency-red);
+    text-shadow: 2px 2px 5px #000;
+    animation: pulse-red 2s infinite;
+    transition: transform 0.2s ease;
+}
+
+.emergency-button:hover {
+    transform: scale(1.05);
+}
+
+.emergency-button:active {
+    transform: scale(0.98);
+}
+
+/* Pulsing Animation */
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 20px var(--emergency-red); }
+    50% { box-shadow: 0 0 35px var(--emergency-red); }
+    100% { box-shadow: 0 0 20px var(--emergency-red); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    .console-panel {
+        margin: 10px;
+        padding: 20px;
+    }
+    h1 {
+        font-size: 2em;
+    }
+    .drawing-area {
+        flex-direction: column;
+    }
+    #dream-canvas {
+        height: 250px;
+    }
+    .toolbar {
+        flex-direction: row;
+        justify-content: center;
+    }
+    .emergency-button {
+        width: 120px;
+        height: 120px;
+        font-size: 1.5em;
+    }
